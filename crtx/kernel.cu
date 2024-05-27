@@ -34,20 +34,21 @@ extern "C" __global__ void __raygen__main()
     );
 
     Hit hit;
-    hit.t                   = int_as_float( t );
-    hit.geom_normal.x       = int_as_float( nx );
-    hit.geom_normal.y       = int_as_float( ny );
-    hit.geom_normal.z       = int_as_float( nz );
+    hit.t                   = __int_as_float( t );
+    hit.geom_normal.x       = __int_as_float( nx );
+    hit.geom_normal.x       = __int_as_float( nx );
+    hit.geom_normal.y       = __int_as_float( ny );
+    hit.geom_normal.z       = __int_as_float( nz );
     params.hits[linear_idx] = hit;
 }
 
 
 extern "C" __global__ void __miss__miss()
 {
-    optixSetPayload_0( float_as_int( -1.0f ) );
-    optixSetPayload_1( float_as_int( 1.0f ) );
-    optixSetPayload_2( float_as_int( 0.0f ) );
-    optixSetPayload_3( float_as_int( 0.0f ) );
+    optixSetPayload_0(__float_as_int( -1.0f ) );
+    optixSetPayload_1(__float_as_int( 0.0f ) );
+    optixSetPayload_2(__float_as_int( 0.0f ) );
+    optixSetPayload_3(__float_as_int( 0.0f ) );
 }
 
 
@@ -71,7 +72,8 @@ __device__ float3 cross(const float3& a, const float3& b) {
 
 extern "C" __global__ void __closesthit__chit()
 {
-    const unsigned int t = optixGetRayTmax();
+    float t = optixGetRayTmax();
+    float3 dir = optixGetWorldRayDirection();
 
     OptixTraversableHandle gas = optixGetGASTraversableHandle();
     unsigned int primIdx = optixGetPrimitiveIndex();
@@ -82,11 +84,11 @@ extern "C" __global__ void __closesthit__chit()
     optixGetTriangleVertexData(gas, primIdx, sbtIdx, time, data);
     float3 AB = data[1] - data[0];
     float3 AC = data[2] - data[0];
-    float3 n = normalize(cross(AB, AC));
+    float3 n = dot(dir, cross(AB, AC))<=0? normalize(cross(AB, AC)): normalize(cross(AC, AB));
 
     // Set the hit data
-    optixSetPayload_0(float_as_int(t));
-    optixSetPayload_1(float_as_int(n.x));
-    optixSetPayload_2(float_as_int(n.y));
-    optixSetPayload_3(float_as_int(n.z));
+    optixSetPayload_0(__float_as_int(t));
+    optixSetPayload_1(__float_as_int(n.x));
+    optixSetPayload_2(__float_as_int(n.y));
+    optixSetPayload_3(__float_as_int(n.z));
 }
