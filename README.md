@@ -9,10 +9,6 @@ Ray tracing using CUDA, accessible from Python.
     * 456.71 or newer for Windows
     * 455.28 or newer for Linux
 
-## Installation
-
-    pip install rtxpy
-
 ## Installation from source
 
 Requires CMake 3.10 or higher to build.
